@@ -78,5 +78,43 @@ We can remove redis from package.json by:
 yarn remove redis
 
 
+#### TypeORM Setup
 
+yarn add typeorm
+
+To create migrations:
+npx typeorm migration:create -n FakePosts -d src/migrations 
+
+
+#### SQL big query vs cached, batched fieldresolver queries using DATALOADER
+
+yarn add dataloader
+
+checkout server/utils/createUserLoader.ts
+then see fieldResolver creator in Post resolver
+it would cache and batch multiple userIds sent in request and query them in single SQL query.
+
+
+#### env vars
+
+checkout .env file for postgres url, redis url and port
+
+yarn add dotenv-safe
+
+create a .env.example file specifying the env params required. The above lib should be imported so that it throws error if any env param not present in .env that is there in example.
+
+yarn add -D gen-env-types
+
+Add a script to package.json to run: yarn <script-name>
+This will generate env.d.ts file having types for the env params
+
+Setting migrations for prod:
+
+set synchronize to false in createConnection
+comment previous migrations and do:
+
+Setup ormconfig file:
+
+
+npx typeorm migration:generate -n Initial
 

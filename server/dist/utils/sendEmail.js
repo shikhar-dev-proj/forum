@@ -16,6 +16,7 @@ exports.sendEmail = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
 function sendEmail(to, html) {
     return __awaiter(this, void 0, void 0, function* () {
+        console.log('sending ///');
         let testAccount = yield nodemailer_1.default.createTestAccount();
         console.log('test account: ', testAccount);
         let transporter = nodemailer_1.default.createTransport({

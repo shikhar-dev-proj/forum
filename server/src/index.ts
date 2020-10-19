@@ -8,31 +8,42 @@ import { UserResolver } from './resolvers/user';
 import Redis from 'ioredis';
 import session from 'express-session';
 import connectRedis from 'connect-redis';
+import 'dotenv-safe/config';
 import { isProd, COOKIE_NAME } from './constants';
 import cors from 'cors';
 import {createConnection} from 'typeorm';
 import { Post } from './entities/Post';
 import { User } from './entities/User';
+import path from 'path';
+import { Upvote } from './entities/Upvote';
+import { createUserLoader } from './utils/createUserLoader';
+import { createUpvoteLoader } from './utils/createUpvoteLoader';
+import { Downvote } from './entities/Downvote';
+//rerun
 
-const RedisStore = connectRedis(session);
-const redis = new Redis();
 
 const main = async () => {
   const connection = await createConnection({
     type: 'postgres',
-    database: 'boilerplatedb',
-    username: 'shikharsharma',
+    url: process.env.DATABASE_URL,
     logging: true,
-    synchronize: true,   // creates tables automatically, no need to run migrations
-    entities: [Post, User]
+    migrations: [path.join(__dirname, './migrations/*')],
+    // synchronize: true,   // creates tables automatically, no need to run migrations, but not in prod
+    entities: [Post, User, Upvote, Downvote]
   });
+
+  await connection.runMigrations();
 
   // const post = orm.em.create(Post, { title: 'first post' });
   // await orm.em.persistAndFlush(post);
   const app = express();
 
+  const RedisStore = connectRedis(session);
+  const redis = new Redis(process.env.REDIS_URL);
+
+  app.set('trust proxy', 1); // telling express there is a proxy sitting in front (nginx)
   app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: process.env.CORS_ORIGIN,
     credentials: true
   }));
 
@@ -49,10 +60,11 @@ const main = async () => {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10,    // 10 years
         httpOnly: true,
         sameSite: 'lax', // csrf, look it up
-        secure: isProd // cookie only works in https
+        secure: isProd, // cookie only works in https
+        domain: isProd ? '.shkdev.xyz' : undefined
       },
       saveUninitialized: false,
-      secret: 'xfcgvjhbkjnlk',
+      secret: process.env.SESSION_SECRET,
       resave: false,
     })
   );
@@ -62,11 +74,17 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false
     }),
-    context: ({ req, res }) => ({ req, res, redis })     // special object available for all resolvers
+    context: ({ req, res }) => ({
+      req, 
+      res, 
+      redis,
+      userLoader: createUserLoader(),
+      upvoteLoader: createUpvoteLoader()
+    })     // special object available for all resolvers
   });
 
   apolloServer.applyMiddleware({ app, cors: false });
-  app.listen(4002, () => {
+  app.listen(parseInt(process.env.PORT), () => {
     console.log('Server started on localhost:4002');
   });
 }

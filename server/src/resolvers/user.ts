@@ -1,6 +1,7 @@
-import { Resolver, Mutation, Field, Arg, Ctx, ObjectType, Query } from 'type-graphql';
+import { Resolver, Mutation, Field, Arg, Ctx, ObjectType, Query, FieldResolver, Root } from 'type-graphql';
 import { MyContext } from '../types';
 import { User } from '../entities/User';
+
 import argon2 from 'argon2';
 import { COOKIE_NAME, FORGOT_PASSWORD_PREFIX } from '../constants';
 import { UsernamePasswordInput } from '../models/UsernamePasswordInput';
@@ -26,8 +27,18 @@ class UserResponse {
   user?: User;
 }
 
-@Resolver()
+@Resolver(User)
 export class UserResolver {
+
+  @FieldResolver(() => String)
+  email(@Root() user: User, @Ctx() { req }: MyContext ) {
+    if (user.id === req.session.userId) {
+      // current user can see his own email
+      return user.email;
+    }
+    // current user should not see other emails
+    return '';
+  }
 
   @Query(() => User, { nullable: true })
   me(@Ctx() { req }: MyContext) {
