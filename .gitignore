@@ -3,7 +3,7 @@
 /server/.env
 
 # dependencies
-/boilerplate-fe//node_modules
+/boilerplate-fe/node_modules
 /boilerplate-fe/.pnp
 /boilerplate-fe/.pnp.js
 

@@ -16,7 +16,7 @@ export const Upvote: React.FC<UpvoteProps> = ({post}) => {
         rightIcon="chevron-up"
         flexDirection="row"
         m={1}
-        variantColor={post.voteStatus === 1 ? "green" : undefined}
+        variantColor={post.voteStatus === 1 ? "primary" : undefined}
         isLoading={loadingState === 'upvoteLoading'}
         onClick={async () => {
           if (post.voteStatus === 1) {
@@ -38,7 +38,7 @@ export const Upvote: React.FC<UpvoteProps> = ({post}) => {
         rightIcon="chevron-down"
         flexDirection="row"
         m={1}
-        variantColor={post.voteStatus === -1 ? "red" : undefined}
+        variantColor={post.voteStatus === -1 ? "error" : undefined}
         isLoading={loadingState === 'downvoteLoading'}
         onClick={async () => {
           if (post.voteStatus === -1) {

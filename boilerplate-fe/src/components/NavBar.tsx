@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Link, Flex, Button, Heading } from '@chakra-ui/core';
+import { Box, Link, Flex, Button, Heading, Avatar } from '@chakra-ui/core';
 import NextLink from 'next/link';
 import { useMeQuery, useLogoutMutation } from '../generated/graphql';
 import { isServer } from '../utils/isServer';
@@ -39,10 +39,11 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
       <>
         <Flex position="sticky" zIndex={1} top={0} align="center">
           <NextLink href="/create-post">
-            <Button as={Link} mr={4} >Create Post</Button>
+            <Button as={Link} mr={4}>Create Post</Button>
           </NextLink>
-          <Box mr={2}>{data.me.username}</Box>
+          <Avatar mr={2} color="white" name={data.me.username} title={data.me.username}></Avatar>
           <Button 
+            color="white"
             onClick={ async () => {
               await logout();
               router.reload();
@@ -55,11 +56,11 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
   }
   return (
     <>
-      <Flex position="sticky" zIndex={1} top={0} bg="tomato" p={4} align="center">
+      <Flex position="sticky" zIndex={1} top={0} bg="primary.700" p={4} align="center">
         <Flex flex={1} align="center" m="auto" maxW={800}>
           <NextLink href="/">
             <Link>
-              <Heading>Forum</Heading>
+              <Heading color="white">Forum</Heading>
             </Link>
           </NextLink>
           <Box ml={'auto'}>
