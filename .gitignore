@@ -1,0 +1,36 @@
+/server/dist
+/server/node_modules
+/server/.env
+
+# dependencies
+/boilerplate-fe//node_modules
+/boilerplate-fe/.pnp
+/boilerplate-fe/.pnp.js
+
+# testing
+/boilerplate-fe/coverage
+
+# next.js
+/boilerplate-fe/.next/
+/boilerplate-fe/out/
+
+# production
+/boilerplate-fe/build
+
+# misc
+/boilerplate-fe/.DS_Store
+/boilerplate-fe/*.pem
+
+# debug
+/boilerplate-fe/npm-debug.log*
+/boilerplate-fe/yarn-debug.log*
+/boilerplate-fe/yarn-error.log*
+
+# local env files
+/boilerplate-fe/.env.local
+/boilerplate-fe/.env.development.local
+/boilerplate-fe/.env.test.local
+/boilerplate-fe/.env.production.local
+
+# vercel
+/boilerplate-fe/.vercel

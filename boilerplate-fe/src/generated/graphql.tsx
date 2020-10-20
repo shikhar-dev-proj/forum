@@ -42,7 +42,8 @@ export type Post = {
   id: Scalars['Int'];
   title: Scalars['String'];
   text: Scalars['String'];
-  points: Scalars['Float'];
+  ups: Scalars['Float'];
+  downs: Scalars['Float'];
   creatorId: Scalars['Float'];
   voteStatus?: Maybe<Scalars['Int']>;
   creator: User;
@@ -148,7 +149,7 @@ export type IdNameUserFragment = (
 
 export type PostSnippetFragment = (
   { __typename?: 'Post' }
-  & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'points' | 'textSnippet' | 'voteStatus'>
+  & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'ups' | 'downs' | 'textSnippet' | 'voteStatus'>
   & { creator: (
     { __typename?: 'User' }
     & Pick<User, 'id' | 'username'>
@@ -194,7 +195,7 @@ export type CreatePostMutation = (
   { __typename?: 'Mutation' }
   & { createPost: (
     { __typename?: 'Post' }
-    & Pick<Post, 'id' | 'title' | 'text' | 'points' | 'creatorId' | 'createdAt' | 'updatedAt'>
+    & Pick<Post, 'id' | 'title' | 'text' | 'ups' | 'downs' | 'creatorId' | 'createdAt' | 'updatedAt'>
   ) }
 );
 
@@ -299,7 +300,7 @@ export type PostQuery = (
   { __typename?: 'Query' }
   & { post?: Maybe<(
     { __typename?: 'Post' }
-    & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'points' | 'text' | 'voteStatus'>
+    & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'ups' | 'downs' | 'text' | 'voteStatus'>
     & { creator: (
       { __typename?: 'User' }
       & Pick<User, 'id' | 'username'>
@@ -331,7 +332,8 @@ export const PostSnippetFragmentDoc = gql`
   createdAt
   updatedAt
   title
-  points
+  ups
+  downs
   textSnippet
   voteStatus
   creator {
@@ -380,7 +382,8 @@ export const CreatePostDocument = gql`
     id
     title
     text
-    points
+    ups
+    downs
     creatorId
     createdAt
     updatedAt
@@ -481,7 +484,8 @@ export const PostDocument = gql`
     createdAt
     updatedAt
     title
-    points
+    ups
+    downs
     text
     voteStatus
     creator {

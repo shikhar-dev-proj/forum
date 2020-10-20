@@ -18,7 +18,6 @@ import path from 'path';
 import { Upvote } from './entities/Upvote';
 import { createUserLoader } from './utils/createUserLoader';
 import { createUpvoteLoader } from './utils/createUpvoteLoader';
-import { Downvote } from './entities/Downvote';
 //rerun
 
 
@@ -29,7 +28,7 @@ const main = async () => {
     logging: true,
     migrations: [path.join(__dirname, './migrations/*')],
     // synchronize: true,   // creates tables automatically, no need to run migrations, but not in prod
-    entities: [Post, User, Upvote, Downvote]
+    entities: [Post, User, Upvote]
   });
 
   await connection.runMigrations();

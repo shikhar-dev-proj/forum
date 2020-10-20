@@ -5,8 +5,6 @@ import { isAuth } from '../middleware/isAuth';
 import { getConnection } from 'typeorm';
 import { Upvote } from '../entities/Upvote';
 import { User } from '../entities/User';
-import { Downvote } from '../entities/Downvote';
-// import { Upvote } from '../entities/Upvote';
 
 @InputType()
 class PostInput {
@@ -64,54 +62,143 @@ export class PostResolver {
     const {userId} = req.session;
     const isUpvote = value !== -1;
     const realValue = isUpvote ? 1 : -1
-    // await Upvote.insert({
-    //   userId,
-    //   postId,
-    //   value: realValue
-    // });
 
     const upvote = await Upvote.findOne({ where: { postId, userId }});
-    // const downvote = await Downvote.findOne({ where: { postId, userId }});
+    const post = await Post.findOne(postId);
 
-    // const hasVoted = !!(upvote || downvote);
+    if (realValue === 1) {
+      // wants to upvote
+      if (upvote?.value === -1) {
+        // had previously downvoted
+        await getConnection().transaction(async (tm) => {
 
+          await tm.query(`
+            update upvote
+            set value = 1
+            where "postId" = $1 and "userId" = $2
+          `, [postId, userId]);
 
-    if (upvote && upvote.value !== realValue) {
-      // changing vote
-      await getConnection().transaction(async (tm) => {
+          // const updatedVote = await Upvote.findOne({ where: { postId, userId }});
+          // const newVotes = [
+          //   ...(post!.upvotes ? post!.upvotes.filter(v => v.postId === postId && v.userId === userId) : []),
+          //   updatedVote
+          // ];
+  
+          await tm.query(`
+            update post
+            set ups = ups + 1,
+            downs = downs - 1
+            where id = $1
+          `, [postId]);
+        });
+      } else if (!upvote) {
+        // no previous vote
 
-        await tm.query(`
-          update upvote
-          set value = $1
-          where "postId" = $2 and "userId" = $3
-        `, [realValue, postId, userId]);
+        await getConnection().transaction(async (tm) => {
 
-        await tm.query(`
-          update post
-          set points = points + $1
-          where id = $2
-        `, [2 * realValue, postId]);
-      });
-    } else if (!upvote) {
-      // no previous vote for this post
+          await tm.query(`
+            insert into upvote ("userId", "postId", value)
+            values ($1, $2, 1)
+          `, [userId, postId]);
 
-      await getConnection().transaction(async (tm) => {
+          // const updatedVote = await Upvote.findOne({ where: { postId, userId }});
+          // const newVotes = [
+          //   ...(post!.upvotes ? post!.upvotes.filter(v => v.postId === postId && v.userId === userId) : []),
+          //   updatedVote
+          // ];
+  
+          await tm.query(`
+            update post
+            set ups = ups + 1
+            where id = $1
+          `, [postId]);
+        });
+      }
 
-        await tm.query(`
-          insert into upvote ("userId", "postId", value)
-          values ($1, $2, $3)
-        `, [userId, postId, realValue]);
+    } else {
+      // wants to downvote
+      if (upvote?.value === 1) {
+        // had previously upvoted
+        await getConnection().transaction(async (tm) => {
 
-        await tm.query(`
-          update post
-          set points = points + $1
-          where id = $2
-        `, [realValue, postId]);
-      });
+          await tm.query(`
+            update upvote
+            set value = -1
+            where "postId" = $1 and "userId" = $2
+          `, [postId, userId]);
+
+          // const updatedVote = await Upvote.findOne({ where: { postId, userId }});
+          // const newVotes = [
+          //   ...post!.upvotes.filter(v => v.postId === postId && v.userId === userId),
+          //   updatedVote
+          // ];
+  
+          await tm.query(`
+            update post
+            set downs = downs + 1,
+            ups = ups - 1
+            where id = $1
+          `, [postId]);
+        });
+      } else if (!upvote) {
+        // no previous vote
+
+        await getConnection().transaction(async (tm) => {
+
+          await tm.query(`
+            insert into upvote ("userId", "postId", value)
+            values ($1, $2, -1)
+          `, [userId, postId]);
+
+          // const updatedVote = await Upvote.findOne({ where: { postId, userId }});
+          // const newVotes = [
+          //   ...(post!.upvotes ? post!.upvotes.filter(v => v.postId === postId && v.userId === userId) : []),
+          //   updatedVote
+          // ];
+  
+          await tm.query(`
+            update post
+            set downs = downs + 1
+            where id = $1
+          `, [postId]);
+        });
+      }
     }
 
-    const post = await Post.findOne(postId);
-    console.log(post);
+
+    // if (upvote && upvote.value !== realValue) {
+    //   // changing vote
+    //   await getConnection().transaction(async (tm) => {
+
+    //     await tm.query(`
+    //       update upvote
+    //       set value = $1
+    //       where "postId" = $2 and "userId" = $3
+    //     `, [realValue, postId, userId]);
+
+    //     await tm.query(`
+    //       update post
+    //       set points = points + $1
+    //       where id = $2
+    //     `, [2 * realValue, postId]);
+    //   });
+    // } else if (!upvote) {
+    //   // no previous vote for this post
+
+    //   await getConnection().transaction(async (tm) => {
+
+    //     await tm.query(`
+    //       insert into upvote ("userId", "postId", value)
+    //       values ($1, $2, $3)
+    //     `, [userId, postId, realValue]);
+
+    //     await tm.query(`
+    //       update post
+    //       set points = points + $1
+    //       where id = $2
+    //     `, [realValue, postId]);
+    //   });
+    // }
 
     return true;
   }

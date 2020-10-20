@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Flex, IconButton } from '@chakra-ui/core';
+import { Button, ButtonGroup, Flex, IconButton } from '@chakra-ui/core';
 import { PostSnippetFragment, useVoteMutation } from '../generated/graphql';
 
 interface UpvoteProps {
@@ -11,9 +11,11 @@ export const Upvote: React.FC<UpvoteProps> = ({post}) => {
   const [, vote] = useVoteMutation();
   return (
     <Flex direction="column" alignItems="center" justifyContent="center" mr={4}>
-      <IconButton 
+      <Button
         aria-label="upvote" 
-        icon="chevron-up"
+        rightIcon="chevron-up"
+        flexDirection="row"
+        m={1}
         variantColor={post.voteStatus === 1 ? "green" : undefined}
         isLoading={loadingState === 'upvoteLoading'}
         onClick={async () => {
@@ -27,11 +29,15 @@ export const Upvote: React.FC<UpvoteProps> = ({post}) => {
           });
           setLoadingState('notLoading')
         }}
-        />
-      {post.points}
-      <IconButton 
+      >
+        {post.ups}
+      </Button>
+      
+      <Button 
         aria-label="downvote"
-        icon="chevron-down"
+        rightIcon="chevron-down"
+        flexDirection="row"
+        m={1}
         variantColor={post.voteStatus === -1 ? "red" : undefined}
         isLoading={loadingState === 'downvoteLoading'}
         onClick={async () => {
@@ -45,7 +51,9 @@ export const Upvote: React.FC<UpvoteProps> = ({post}) => {
           });
           setLoadingState('notLoading')
         }}
-        />
+        >
+          {post.downs}
+        </Button>
     </Flex>
   );
 }
