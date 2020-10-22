@@ -5,6 +5,7 @@ import { isAuth } from '../middleware/isAuth';
 import { getConnection } from 'typeorm';
 import { Upvote } from '../entities/Upvote';
 import { User } from '../entities/User';
+import { Comment } from '../entities/Comment';
 
 @InputType()
 class PostInput {
@@ -51,6 +52,27 @@ export class PostResolver {
     return userLoader.load(post.creatorId);
   }
 
+  @FieldResolver(() => [Comment])
+  async comments(
+    @Root() post: Post
+  ) {
+    const comments = await Comment.find({ where: { postId: post.id }});
+    return comments;
+  }
+
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
+  async commentOnPost(
+    @Arg('postId', () => Int) postId: number,
+    @Arg('value', () => String) message: string,
+    @Ctx() { req }: MyContext
+  ): Promise<boolean> {
+    const { userId } = req.session;
+    const user = await User.findOne(userId);
+    await Comment.insert({ postId, userId, message, commenter: user?.username });
+    return true;
+  }
+
 
   @Mutation(() => Boolean)
   @UseMiddleware(isAuth)
@@ -64,7 +86,6 @@ export class PostResolver {
     const realValue = isUpvote ? 1 : -1
 
     const upvote = await Upvote.findOne({ where: { postId, userId }});
-    const post = await Post.findOne(postId);
 
     if (realValue === 1) {
       // wants to upvote
@@ -165,43 +186,10 @@ export class PostResolver {
       }
     }
 
-
-    // if (upvote && upvote.value !== realValue) {
-    //   // changing vote
-    //   await getConnection().transaction(async (tm) => {
-
-    //     await tm.query(`
-    //       update upvote
-    //       set value = $1
-    //       where "postId" = $2 and "userId" = $3
-    //     `, [realValue, postId, userId]);
-
-    //     await tm.query(`
-    //       update post
-    //       set points = points + $1
-    //       where id = $2
-    //     `, [2 * realValue, postId]);
-    //   });
-    // } else if (!upvote) {
-    //   // no previous vote for this post
-
-    //   await getConnection().transaction(async (tm) => {
-
-    //     await tm.query(`
-    //       insert into upvote ("userId", "postId", value)
-    //       values ($1, $2, $3)
-    //     `, [userId, postId, realValue]);
-
-    //     await tm.query(`
-    //       update post
-    //       set points = points + $1
-    //       where id = $2
-    //     `, [realValue, postId]);
-    //   });
-    // }
-
     return true;
   }
+
+
 
   @Query(() => PaginatedPosts)        // Query --> for getting data
   async posts(

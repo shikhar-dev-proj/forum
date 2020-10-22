@@ -1,5 +1,6 @@
 import { ObjectType, Field, Int } from "type-graphql";
 import { Entity, PrimaryGeneratedColumn, CreateDateColumn, Column, UpdateDateColumn, BaseEntity, OneToMany } from "typeorm";
+import { Comment } from "./Comment";
 import { Post } from "./Post";
 import { Upvote } from "./Upvote";
 
@@ -27,6 +28,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Upvote, upvote => upvote.user)
   upvotes: Upvote[];
+
+  @OneToMany(() => Comment, comment => comment.user)
+  comments: Comment[];
   
   @Field(() => String)      // graphql type to convert class into graphql types
   @CreateDateColumn()

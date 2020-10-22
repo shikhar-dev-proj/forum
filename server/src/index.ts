@@ -18,6 +18,7 @@ import path from 'path';
 import { Upvote } from './entities/Upvote';
 import { createUserLoader } from './utils/createUserLoader';
 import { createUpvoteLoader } from './utils/createUpvoteLoader';
+import { Comment } from './entities/Comment';
 //rerun
 
 
@@ -27,8 +28,8 @@ const main = async () => {
     url: process.env.DATABASE_URL,
     logging: true,
     migrations: [path.join(__dirname, './migrations/*')],
-    // synchronize: true,   // creates tables automatically, no need to run migrations, but not in prod
-    entities: [Post, User, Upvote]
+    synchronize: true,   // creates tables automatically, no need to run migrations, but not in prod?
+    entities: [Comment, Post, User, Upvote]
   });
 
   await connection.runMigrations();

@@ -2,6 +2,7 @@ import { ObjectType, Field, Int } from "type-graphql";
 import { Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Column, BaseEntity, ManyToOne, OneToMany } from "typeorm";
 import { User } from "./User";
 import { Upvote } from "./Upvote";
+import { Comment } from "./Comment";
 
 @ObjectType()     // graphql type to convert class into graphql types
 @Entity()
@@ -40,6 +41,9 @@ export class Post extends BaseEntity {
 
   @OneToMany(() => Upvote, upvote => upvote.post)
   upvotes: Upvote[];
+
+  @OneToMany(() => Comment, comment => comment.post)
+  comments: Comment[];
 
   @Field(() => String)      // graphql type to convert class into graphql types
   @CreateDateColumn()
