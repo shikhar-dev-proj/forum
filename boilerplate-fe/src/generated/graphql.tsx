@@ -50,6 +50,7 @@ export type Post = {
   createdAt: Scalars['String'];
   updatedAt: Scalars['String'];
   textSnippet: Scalars['String'];
+  comments: Array<Comment>;
 };
 
 export type User = {
@@ -61,8 +62,21 @@ export type User = {
   updatedAt: Scalars['String'];
 };
 
+export type Comment = {
+  __typename?: 'Comment';
+  id: Scalars['Int'];
+  userId: Scalars['Int'];
+  postId: Scalars['Int'];
+  message: Scalars['String'];
+  commenter: Scalars['String'];
+  user: User;
+  post: Post;
+  createdAt: Scalars['String'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
+  commentOnPost: Scalars['Boolean'];
   vote: Scalars['Boolean'];
   createPost: Post;
   updatePost?: Maybe<Post>;
@@ -72,6 +86,12 @@ export type Mutation = {
   register: UserResponse;
   login: UserResponse;
   logout: Scalars['Boolean'];
+};
+
+
+export type MutationCommentOnPostArgs = {
+  value: Scalars['String'];
+  postId: Scalars['Int'];
 };
 
 
@@ -184,6 +204,17 @@ export type ChangePasswordMutation = (
     { __typename?: 'UserResponse' }
     & RegularUserResponseFragment
   ) }
+);
+
+export type CommentOnPostMutationVariables = Exact<{
+  postId: Scalars['Int'];
+  value: Scalars['String'];
+}>;
+
+
+export type CommentOnPostMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'commentOnPost'>
 );
 
 export type CreatePostMutationVariables = Exact<{
@@ -301,7 +332,10 @@ export type PostQuery = (
   & { post?: Maybe<(
     { __typename?: 'Post' }
     & Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'title' | 'ups' | 'downs' | 'text' | 'voteStatus'>
-    & { creator: (
+    & { comments: Array<(
+      { __typename?: 'Comment' }
+      & Pick<Comment, 'id' | 'message' | 'commenter' | 'createdAt'>
+    )>, creator: (
       { __typename?: 'User' }
       & Pick<User, 'id' | 'username'>
     ) }
@@ -375,6 +409,15 @@ export const ChangePasswordDocument = gql`
 
 export function useChangePasswordMutation() {
   return Urql.useMutation<ChangePasswordMutation, ChangePasswordMutationVariables>(ChangePasswordDocument);
+};
+export const CommentOnPostDocument = gql`
+    mutation CommentOnPost($postId: Int!, $value: String!) {
+  commentOnPost(postId: $postId, value: $value)
+}
+    `;
+
+export function useCommentOnPostMutation() {
+  return Urql.useMutation<CommentOnPostMutation, CommentOnPostMutationVariables>(CommentOnPostDocument);
 };
 export const CreatePostDocument = gql`
     mutation CreatePost($input: PostInput!) {
@@ -488,6 +531,12 @@ export const PostDocument = gql`
     downs
     text
     voteStatus
+    comments {
+      id
+      message
+      commenter
+      createdAt
+    }
     creator {
       id
       username
