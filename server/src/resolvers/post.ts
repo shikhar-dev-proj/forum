@@ -40,7 +40,6 @@ export class PostResolver {
       return null;
     }
     const upvote = await upvoteLoader.load({ postId: post.id, userId: req.session.userId });
-
     return upvote ? upvote.value : null;
   }
 
@@ -283,6 +282,7 @@ export class PostResolver {
       throw new Error('not authorised to delete post');
     }
     await Upvote.delete({ postId: id });
+    await Comment.delete({ postId: id });
     await Post.delete({ id });
     return true;
   }
